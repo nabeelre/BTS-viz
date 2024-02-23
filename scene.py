@@ -3,14 +3,21 @@ from manim.utils.rate_functions import ease_in_expo, ease_in_sine
 
 class CoDEx(MovingCameraScene):
     def construct(self):
-        skip_opening = False
-        skip_2018 = False
-        skip_scrolling = False
+        skip_opening = True
+        skip_2018 = True
+        skip_scrolling = True
+        skip_mag_duration = True
+        skip_ML = False
 
         # Timeline
         n = NumberLine(x_range=[0,300], tick_size=0)
         if skip_opening:
             self.add(n)
+
+        # initialize scrolling objects
+        year_ticks = [Line(start=[n.n2p(x)[0], 0, 0], end=[n.n2p(x)[0], -1, 0]) for x in np.arange(170,290,20)]
+        year_labels = [Text(str(s), font_size=36).next_to(year_ticks[i], DOWN, buff=0.1) for i, s in enumerate(np.arange(2019,2025,1))]
+        self.add(*year_ticks, *year_labels)
 
         if not skip_opening:
             # Create and add stars randomly - TODO make stars twinkle, add galaxies
@@ -121,14 +128,22 @@ class CoDEx(MovingCameraScene):
             self.play(Uncreate(exposure_flash), run_time=0.15, rate_func=linear)
             self.wait(0.7)
 
+            data_rate_text = VGroup(
+                MathTex("10^6 \\textrm{ possible detections and}", font_size=26),
+                Text("TBs of images produced", font_size=18),
+                MarkupText("every night", font_size=18, weight=BOLD)
+            ).arrange(DOWN*0.3).next_to(cutout, DOWN, buff=0.2)
+            self.play(Uncreate(field), Uncreate(line1), Uncreate(line2), Write(data_rate_text))
+            self.wait(2)
+
             # P60 text
             p60_text = VGroup(
-                Text("And the P60 telescope records", font_size=26),
+                Text("Then, the P60 telescope records", font_size=26),
                 Text("their chemical signatures to", font_size=26),  
                 MarkupText("<gradient from='BLUE' to='RED' offset='1'>classify</gradient> them", 
                             font_size=26, gradient=(BLUE, RED))
             ).arrange(DOWN*0.4).next_to(p60_image, DOWN, buff=0.16)
-            self.play(Uncreate(field), Uncreate(line1), Uncreate(line2), Write(p60_text), run_time=1)
+            self.play(Write(p60_text), run_time=1)
             self.wait(2)
 
             # Create P60 field and lines
@@ -186,12 +201,8 @@ class CoDEx(MovingCameraScene):
             self.play(Uncreate(field), Uncreate(line1), Uncreate(line2), run_time=1)
             self.wait(2)
 
-        if not skip_scrolling:
-            # initialize scrolling objects
-            year_ticks = [Line(start=[n.n2p(x)[0], 0, 0], end=[n.n2p(x)[0], -1, 0]) for x in np.arange(170,290,20)]
-            year_labels = [Text(str(s), font_size=36).next_to(year_ticks[i], DOWN, buff=0.1) for i, s in enumerate(np.arange(2019,2025,1))]
-            self.add(*year_ticks, *year_labels)
 
+        if not skip_scrolling:
             if not skip_2018:
                 # Fast forward to scrolling start
                 self.play(self.camera.frame.animate.move_to([n.n2p(159)[0], 2, 0]), rate_func=ease_in_sine, run_time=3)
@@ -211,7 +222,7 @@ class CoDEx(MovingCameraScene):
                 VGroup(Text("Point size related to SN brightness", font_size=22, color=WHITE))
             ).arrange(DOWN*0.5, aligned_edge=LEFT).move_to([n.n2p(159+9)[0], 2, 0])
 
-            frames_to_render = 578  # maximum 578
+            frames_to_render = 20  # maximum 578
             file_names = [f'media/images/frames/output{i}.jpeg' for i in np.arange(1, frames_to_render)]
             frames = [ImageMobject(frame) for frame in file_names]
 
@@ -238,7 +249,7 @@ class CoDEx(MovingCameraScene):
                     legend_text.animate.move_to([n.n2p(new_pos)[0]+4.5, 2, 0]),
                     prev_frame.animate.move_to([n.n2p(new_pos)[0]-2, 2.1, 0]),
                     self.camera.frame.animate.move_to([n.n2p(new_pos)[0], 2, 0]),
-                    rate_func=linear, run_time=frame_time/35
+                    rate_func=linear, run_time=frame_time/25
                 )
                 cur_pos = new_pos
                 self.add(frame.move_to(prev_frame))
@@ -284,21 +295,92 @@ class CoDEx(MovingCameraScene):
             self.play(Write(post_scroll_text[2]))
             self.play(Create(southern_sky), run_time=2)
             self.wait(0.5)
-            self.play(Write(post_scroll_text[3]), Create(MW_plane), run_time=2)
+            self.play(Write(post_scroll_text[3]))
+            self.play(Create(MW_plane), run_time=2)
             self.wait(0.5)
+
+            self.play(FadeOut(frame), Uncreate(post_scroll_text), 
+                      Uncreate(bts_text), Uncreate(southern_sky), 
+                      Uncreate(MW_plane), run_time=2)
+
+        if not skip_mag_duration:
+            if skip_2018:
+                self.camera.frame.move_to([n.n2p(270)[0], 2, 0])
 
             bts_sample_text = VGroup(
                 Text("Still, the BTS sample now contains nearly", font_size=32, color=WHITE),
                 Text("10,000 supernovae", gradient=(RED, ORANGE), font_size=46),
-                Text("with publicly available spectroscopic classifications,", font_size=28, color=WHITE),
-                Text("more than a single group in the world.", font_size=28, color=WHITE)
-            ).arrange(DOWN*0.4).move_to(bts_text)
+                Text("with publicly available classifications", font_size=28, color=WHITE)
+            ).arrange(DOWN*0.4).move_to([n.n2p(270)[0], 4.8, 0])
 
-            self.play(FadeOut(frame), Uncreate(post_scroll_text), 
-                      Uncreate(bts_text), Write(bts_sample_text[0]), 
-                      Uncreate(southern_sky), Uncreate(MW_plane), run_time=2)
+            self.play(Write(bts_sample_text[0]))
             self.play(GrowFromCenter(bts_sample_text[1]))
             self.play(Write(bts_sample_text[2:]))
+            self.wait(1.5)
+
+            self.play(Uncreate(bts_sample_text[0]), Uncreate(bts_sample_text[2]),
+                      bts_sample_text[1].animate.move_to(bts_sample_text[0]))
+
+            file_names = [f'media/images/SNe/scatter{i}.png' for i in range(0,6)]
+            scatters = [ImageMobject(scatter).move_to(bts_sample_text[1]).shift(DOWN*3 + LEFT*2) for scatter in file_names]
+
+            legend_text = VGroup(
+                Text("Legend:", font_size=28),
+                VGroup(Dot(color=RED).shift(LEFT),          Text("Type Ia SNe",        font_size=22, color=RED)),
+                VGroup(Dot(color=BLUE_E).shift(LEFT*1.375), Text("Core collapse SNe",  font_size=22, color=BLUE_E)),
+                VGroup(Dot(color=GREEN).shift(LEFT*1.49),   Text("Super-luminous SNe", font_size=22, color=GREEN)),
+                VGroup(Dot(color=YELLOW).shift(LEFT*0.62),  Text("Novae", font_size=22, color=YELLOW)),
+            ).arrange(DOWN*0.5, aligned_edge=LEFT).move_to([n.n2p(274.5)[0], 2.4, 0])
+
+            annotation_text = VGroup(
+                Text("Small range of intrinsic brightness -> use to calibrate distances", font_size=18, color=WHITE),
+                Text("Variety of progenitor properties -> variety of observable properties", font_size=18, color=WHITE),
+                MarkupText("Rare but <i>extremely</i> bright", font_size=18, color=WHITE),
+                Text("Intrinsicly faint, so only visible when very nearby", font_size=18, color=WHITE)
+            ).move_to(scatters[0])
+
+            # Legend, axes
+            self.play(FadeIn(scatters[0].scale(0.4)), Write(legend_text[0]))
+            self.wait(3)
+            
+            # Ias
+            self.play(FadeIn(scatters[1].scale(0.4)), Write(legend_text[1]))
+            self.play(Write(annotation_text[0].shift(RIGHT*0.2)))
+            self.remove(scatters[0])
+            self.wait(2)
+            
+            # IIs
+            self.play(FadeIn(scatters[2].scale(0.4)), Write(legend_text[2]), 
+                      Uncreate(annotation_text[0]))
+            self.play(Write(annotation_text[1].shift(RIGHT*0.2)))
+            self.remove(scatters[1])
+            self.wait(2)
+            
+            # SLSN
+            self.play(FadeIn(scatters[3].scale(0.4)), Write(legend_text[3]), 
+                      Uncreate(annotation_text[1]))
+            self.play(Write(annotation_text[2].shift(RIGHT*3.5 + UP*1.5)))
+            self.remove(scatters[2])
+            self.wait(2)
+            
+            # Novae
+            self.play(FadeIn(scatters[4].scale(0.4)), Write(legend_text[4]), 
+                      Uncreate(annotation_text[2]))
+            self.play(Write(annotation_text[3].shift(LEFT*0.5, DOWN*0.7)))
+            self.remove(scatters[3])
+            self.wait(3)
+
+            self.play(Uncreate(annotation_text[3]))
+            self.wait(4)
+
+            self.play(Uncreate(legend_text), Uncreate(bts_sample_text[1]),
+                      FadeOut(scatters[4]))
+
+        if not skip_ML:
+            if skip_2018:
+                self.camera.frame.move_to([n.n2p(270)[0], 2, 0])
+
+            pass
 
         self.wait(4)
 

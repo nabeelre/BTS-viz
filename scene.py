@@ -1,15 +1,14 @@
 from manim import *
-from manim.utils.rate_functions import ease_in_expo, ease_out_cubic
-# from manim.mobject.geometry import *
+from manim.utils.rate_functions import ease_in_expo, ease_in_sine
 
 class CoDEx(MovingCameraScene):
     def construct(self):
         skip_opening = False
         skip_2018 = False
-        skip_2023 = False
+        skip_scrolling = False
 
         # Timeline
-        n = NumberLine(x_range=[0,300], tick_size=0.0)
+        n = NumberLine(x_range=[0,300], tick_size=0)
         if skip_opening:
             self.add(n)
 
@@ -18,10 +17,10 @@ class CoDEx(MovingCameraScene):
             num_stars = 5000
             star_radius = 0.01
             for _ in range(num_stars):
-                x = np.random.uniform(-250, 250)
+                x = np.random.uniform(-50, 350)
                 y = np.random.uniform(-5, 5)
                 radius = np.random.normal(star_radius, star_radius/2)
-                star = Dot(point=[x, y, 0], radius=radius, color=WHITE)
+                star = Dot(point=[n.n2p(x)[0], y, 0], radius=radius, color=WHITE)
                 self.add(star)
 
             # initialize WD
@@ -187,43 +186,42 @@ class CoDEx(MovingCameraScene):
             self.play(Uncreate(field), Uncreate(line1), Uncreate(line2), run_time=1)
             self.wait(2)
 
-        if not skip_2023:
-            # initialize 2023 frame objects
-            year_ticks = [Line(start=[n.n2p(x)[0], 0, 0], end=[n.n2p(x)[0], -1, 0]) for x in np.arange(170,270,20)]
-            year_labels = [Text(str(s), font_size=36).next_to(year_ticks[i], DOWN, buff=0.1) for i, s in enumerate(np.arange(2019,2024,1))]
+        if not skip_scrolling:
+            # initialize scrolling objects
+            year_ticks = [Line(start=[n.n2p(x)[0], 0, 0], end=[n.n2p(x)[0], -1, 0]) for x in np.arange(170,290,20)]
+            year_labels = [Text(str(s), font_size=36).next_to(year_ticks[i], DOWN, buff=0.1) for i, s in enumerate(np.arange(2019,2025,1))]
             self.add(*year_ticks, *year_labels)
 
             if not skip_2018:
-                # Fast forward to 2023
-                self.play(self.camera.frame.animate.move_to([n.n2p(163)[0], 2, 0]), rate_func=linear, run_time=2)
+                # Fast forward to scrolling start
+                self.play(self.camera.frame.animate.move_to([n.n2p(159)[0], 2, 0]), rate_func=ease_in_sine, run_time=3)
             else:
-                # BTS sample pt1
-                self.camera.frame.move_to([n.n2p(163)[0], 2, 0])
+                self.camera.frame.move_to([n.n2p(159)[0], 2, 0])
 
-            # BTS sample pt1
             bts_text = VGroup(
                 Text("Over the years, this telescope duo and the BTS team have", font_size=32),
                 Text("discovered and classified thousands of SNe all over the sky.", font_size=32)
-            ).arrange(DOWN*0.4).move_to([n.n2p(163+5)[0], 4.8, 0])
+            ).arrange(DOWN*0.4).move_to([n.n2p(159+5)[0], 4.8, 0])
 
             legend_text = VGroup(
                 Text("Legend:", font_size=28),
                 VGroup(Dot(color=RED).shift(LEFT),          Text("Type Ia SNe",        font_size=22, color=RED)),
                 VGroup(Dot(color=BLUE_C).shift(LEFT*1.375), Text("Core collapse SNe",  font_size=22, color=BLUE_C)),
-                VGroup(Dot(color=GREEN).shift(LEFT*1.49),   Text("Super-luminous SNe", font_size=22, color=GREEN))
-            ).arrange(DOWN*0.5, aligned_edge=LEFT).move_to([n.n2p(163+9)[0], 2, 0])
+                VGroup(Dot(color=GREEN).shift(LEFT*1.49),   Text("Super-luminous SNe", font_size=22, color=GREEN)),
+                VGroup(Text("Point size related to SN brightness", font_size=22, color=WHITE))
+            ).arrange(DOWN*0.5, aligned_edge=LEFT).move_to([n.n2p(159+9)[0], 2, 0])
 
             frames_to_render = 578  # maximum 578
             file_names = [f'media/images/frames/output{i}.jpeg' for i in np.arange(1, frames_to_render)]
             frames = [ImageMobject(frame) for frame in file_names]
 
-            cur_pos = 163
-            scroll_speed = 2.5*2  # number line units per seconds
+            cur_pos = 159
+            scroll_speed = 2.75 # frames per number line unit
             run_time = 2
             new_pos = cur_pos + scroll_speed*run_time
             self.play(
                 Create(bts_text), bts_text.animate.move_to([n.n2p(new_pos)[0], 4.8, 0]),
-                FadeIn(legend_text), legend_text.animate.move_to([n.n2p(new_pos)[0]+4, 2, 0]),
+                FadeIn(legend_text), legend_text.animate.move_to([n.n2p(new_pos)[0]+4.5, 2, 0]),
                 FadeIn(frames[0].next_to(bts_text, DOWN, 0.2).shift(LEFT*3)), 
                 frames[0].animate.move_to([n.n2p(new_pos)[0]-2, 2.1, 0]), 
                 self.camera.frame.animate.move_to([n.n2p(new_pos)[0], 2, 0]), 
@@ -232,23 +230,77 @@ class CoDEx(MovingCameraScene):
             cur_pos = new_pos
 
             prev_frame = frames[0]
-            frame_time = 0.0667/2  # seconds per frame
-            for frame in frames[1:]:
+            frame_time = 0.0667  # seconds per frame
+            for frame in frames[1:-1]:
                 new_pos = cur_pos + scroll_speed*frame_time
                 self.play(
                     bts_text.animate.move_to([n.n2p(new_pos)[0], 4.8, 0]),
-                    legend_text.animate.move_to([n.n2p(new_pos)[0]+4, 2, 0]),
+                    legend_text.animate.move_to([n.n2p(new_pos)[0]+4.5, 2, 0]),
                     prev_frame.animate.move_to([n.n2p(new_pos)[0]-2, 2.1, 0]),
                     self.camera.frame.animate.move_to([n.n2p(new_pos)[0], 2, 0]),
-                    rate_func=linear, run_time=frame_time
+                    rate_func=linear, run_time=frame_time/35
                 )
                 cur_pos = new_pos
                 self.add(frame.move_to(prev_frame))
                 self.remove(prev_frame)
-                # self.wait(0.0667/3)
                 prev_frame = frame
+
+            # Last frame
+            frame = frames[-1]
+            self.play(
+                bts_text.animate.move_to([n.n2p(270)[0], 4.8, 0]),
+                legend_text.animate.move_to([n.n2p(270)[0]+4.5, 2, 0]),
+                prev_frame.animate.move_to([n.n2p(270)[0]-2, 2.1, 0]),
+                self.camera.frame.animate.move_to([n.n2p(270)[0], 2, 0]),
+                rate_func=ease_in_expo, run_time=frame_time/4
+            )
+            self.add(frame.move_to(prev_frame))
+            self.remove(prev_frame)
+
+            self.wait(1)
+
+            # Post-scrolling text
+            post_scroll_text = VGroup(
+                Text("We can't search for supernovae", font_size=22, color=WHITE),
+                Text("everywhere, however.", font_size=22, color=WHITE),
+                Text("Some areas are too far south", font_size=22, color=PURPLE_A),
+                Text("Some are obscured by the Milky Way", font_size=22, color=GREEN_B)
+            ).arrange(DOWN*0.4, aligned_edge=LEFT).move_to(legend_text).shift(RIGHT*0.2)
+
+            MW_plane = Rectangle(color=GREEN_B, height=frame.height/10, width=frame.width).move_to(frames[-1])
+
+            a = frame.get_center() + (LEFT*frame.width/40)
+            b = frame.get_center() + (RIGHT*frame.width/6 + UP*frame.height/5)
+            c = frame.get_center() + (DOWN*frame.height/2.2)
+            d = frame.get_center() + (RIGHT*frame.width/2.8 + DOWN*frame.height/15)
+            southern_sky = ArcPolygon(
+                c, d, b, a, radius=3, color=PURPLE_A, 
+                arc_config={"color": PURPLE_A, "radius": 3}
+            )
+
+            self.play(Uncreate(legend_text), Write(post_scroll_text[0]), 
+                      Write(post_scroll_text[1]))
+            self.wait(0.3)
+            self.play(Write(post_scroll_text[2]))
+            self.play(Create(southern_sky), run_time=2)
+            self.wait(0.5)
+            self.play(Write(post_scroll_text[3]), Create(MW_plane), run_time=2)
+            self.wait(0.5)
+
+            bts_sample_text = VGroup(
+                Text("Still, the BTS sample now contains nearly", font_size=32, color=WHITE),
+                Text("10,000 supernovae", gradient=(RED, ORANGE), font_size=46),
+                Text("with publicly available spectroscopic classifications,", font_size=28, color=WHITE),
+                Text("more than a single group in the world.", font_size=28, color=WHITE)
+            ).arrange(DOWN*0.4).move_to(bts_text)
+
+            self.play(FadeOut(frame), Uncreate(post_scroll_text), 
+                      Uncreate(bts_text), Write(bts_sample_text[0]), 
+                      Uncreate(southern_sky), Uncreate(MW_plane), run_time=2)
+            self.play(GrowFromCenter(bts_sample_text[1]))
+            self.play(Write(bts_sample_text[2:]))
 
         self.wait(4)
 
 
-        # end credits to ESA/Gaia/DPAC, Christoffer Fremling, Caltech,   
+        # end credits to ESA/Gaia/DPAC, Christoffer Fremling, Caltech, 

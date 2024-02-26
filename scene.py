@@ -77,15 +77,15 @@ class CoDEx(MovingCameraScene):
                 self.camera.frame.move_to([n.n2p(150)[0], 2, 0])
 
             # Intro text
-            ztf_1 = Text("In 2018, the Zwicky Transient Facility (ZTF) and the Bright Transient Survey (BTS)", font_size=28).shift([n.n2p(150)[0], 4.7, 0])
-            ztf_2 = Text("began scanning the sky to search for supernovae (SNe), the explosive deaths of stars.", font_size=28).next_to(ztf_1, DOWN, buff=0.1)
+            ztf_1 = MathTex("\\textrm{In 2018, the Zwicky Transient Facility (ZTF) and the Bright Transient Survey (BTS)}", font_size=36).shift([n.n2p(150)[0], 4.7, 0])
+            ztf_2 = MathTex("\\textrm{began scanning the sky to search for supernovae (SNe), the explosive deaths of stars.}", font_size=36).next_to(ztf_1, DOWN, buff=0.1)
             self.play(Write(ztf_1), Write(ztf_2), run_time=2.5)
             self.wait(4)
 
             # P48 text
             p48_text = VGroup(
-                Text("The P48 telescope images", font_size=26),
-                Text("large swaths of sky nightly to", font_size=26),
+                MathTex("\\textrm{The P48 telescope images}", font_size=32),
+                MathTex("\\textrm{large swaths of sky nightly to}", font_size=32),
                 MarkupText("<gradient from='GREEN' to='BLUE' offset='1'>discover</gradient> new SNe", 
                             font_size=26, gradient=(GREEN, BLUE))
             ).arrange(DOWN*0.4).next_to(p48_image, DOWN, buff=0.16)
@@ -138,8 +138,8 @@ class CoDEx(MovingCameraScene):
 
             # P60 text
             p60_text = VGroup(
-                Text("Then, the P60 telescope records", font_size=26),
-                Text("their chemical signatures to", font_size=26),  
+                MathTex("\\textrm{Then, the P60 telescope records}", font_size=32),
+                MathTex("\\textrm{their chemical signatures to}", font_size=32),  
                 MarkupText("<gradient from='BLUE' to='RED' offset='1'>classify</gradient> them", 
                             font_size=26, gradient=(BLUE, RED))
             ).arrange(DOWN*0.4).next_to(p60_image, DOWN, buff=0.16)
@@ -210,16 +210,16 @@ class CoDEx(MovingCameraScene):
                 self.camera.frame.move_to([n.n2p(159)[0], 2, 0])
 
             bts_text = VGroup(
-                Text("Over the years, this telescope duo and the BTS team have", font_size=32),
-                Text("discovered and classified thousands of SNe all over the sky.", font_size=32)
+                MathTex("\\textrm{Over the years, this telescope duo and the BTS team have}", font_size=40),
+                MathTex("\\textrm{discovered and classified thousands of SNe all over the sky.}", font_size=40)
             ).arrange(DOWN*0.4).move_to([n.n2p(159+5)[0], 4.8, 0])
 
             legend_text = VGroup(
-                Text("Legend:", font_size=28),
-                VGroup(Dot(color=RED).shift(LEFT),          Text("Type Ia SNe",        font_size=22, color=RED)),
-                VGroup(Dot(color=BLUE_C).shift(LEFT*1.375), Text("Core collapse SNe",  font_size=22, color=BLUE_C)),
-                VGroup(Dot(color=GREEN).shift(LEFT*1.49),   Text("Super-luminous SNe", font_size=22, color=GREEN)),
-                VGroup(Text("Point size related to SN brightness", font_size=22, color=WHITE))
+                MathTex("\\textrm{Legend:}", font_size=34),
+                VGroup(Dot(color=RED).shift(LEFT),          MathTex("\\textrm{Type Ia SNe}",        font_size=30, color=RED)),
+                VGroup(Dot(color=BLUE_C).shift(LEFT*1.375), MathTex("\\textrm{Core collapse SNe}",  font_size=30, color=BLUE_C)),
+                VGroup(Dot(color=GREEN).shift(LEFT*1.49),   MathTex("\\textrm{Super-luminous SNe}", font_size=30, color=GREEN)),
+                VGroup(MathTex("\\textrm{Point size related to SN brightness}", font_size=30, color=WHITE))
             ).arrange(DOWN*0.5, aligned_edge=LEFT).move_to([n.n2p(159+9)[0], 2, 0])
 
             frames_to_render = 578  # maximum 578
@@ -275,10 +275,10 @@ class CoDEx(MovingCameraScene):
 
             # Post-scrolling text
             post_scroll_text = VGroup(
-                Text("We can't search for supernovae", font_size=22, color=WHITE),
-                Text("everywhere, however.", font_size=22, color=WHITE),
-                Text("Some areas are too far south", font_size=22, color=PURPLE_A),
-                Text("Some are obscured by the Milky Way", font_size=22, color=GREEN_B)
+                MathTex("\\textrm{We can't search for supernovae}", font_size=30, color=WHITE),
+                MathTex("\\textrm{everywhere, however.}", font_size=30, color=WHITE),
+                MathTex("\\textrm{Some areas are too far south}", font_size=30, color=PURPLE_A),
+                MathTex("\\textrm{Some are obscured by the Milky Way}", font_size=30, color=GREEN_B)
             ).arrange(DOWN*0.4, aligned_edge=LEFT).move_to(legend_text).shift(RIGHT*0.2)
 
             MW_plane = Rectangle(color=GREEN_B, height=frame.height/10, width=frame.width).move_to(frames[-1])
@@ -330,10 +330,24 @@ class CoDEx(MovingCameraScene):
 
             legend_text = VGroup(
                 Text("Legend:", font_size=28),
-                VGroup(Dot(color=RED).shift(LEFT),          Text("Type Ia SNe",        font_size=22, color=RED)),
-                VGroup(Dot(color=BLUE_E).shift(LEFT*1.375), Text("Core collapse SNe",  font_size=22, color=BLUE_E)),
-                VGroup(Dot(color=GREEN).shift(LEFT*1.49),   Text("Super-luminous SNe", font_size=22, color=GREEN)),
-                VGroup(Dot(color=YELLOW).shift(LEFT*0.62),  Text("Novae", font_size=22, color=YELLOW)),
+                VGroup(
+                    Dot(color=RED).shift(LEFT), 
+                    Text("Type Ia SNe", font_size=22, color=RED)
+                ),
+                VGroup(
+                    Cross(stroke_width=8, stroke_color=BLUE_E, scale_factor=0.09).shift(LEFT*1.375), 
+                    Text("Core collapse SNe", font_size=22, color=BLUE_E)
+                ),
+                VGroup(
+                    Square(color=GREEN, fill_color=GREEN, side_length=0.1, 
+                           fill_opacity=1).rotate(PI/4).shift(LEFT*1.49), 
+                    Text("Super-luminous SNe", font_size=22, color=GREEN)
+                ),
+                VGroup(
+                    RegularPolygon(n=6, color=YELLOW, fill_color=YELLOW, radius=0.075,
+                                   fill_opacity=1).rotate(PI/2).shift(LEFT*0.62),  
+                    Text("Novae", font_size=22, color=YELLOW)
+                ),
             ).arrange(DOWN*0.5, aligned_edge=LEFT).move_to([n.n2p(274.5)[0], 2.4, 0])
 
             annotation_text = VGroup(
@@ -343,9 +357,9 @@ class CoDEx(MovingCameraScene):
                     MathTex("\\textrm{used~to~calibrate~distances}", font_size=24, color=WHITE)
                 ).arrange(RIGHT*0.3),
                 VGroup(
-                    MathTex("\\textrm{Variety~of~precursor~properties}", font_size=24, color=WHITE), 
+                    MathTex("\\textrm{Variety~of~stellar~properties}", font_size=24, color=WHITE), 
                     MathTex("\\rightarrow", font_size=24, color=WHITE), 
-                    MathTex("\\textrm{variety~of~observable~properties}", font_size=24, color=WHITE)
+                    MathTex("\\textrm{variety~of~supernova~properties}", font_size=24, color=WHITE)
                 ).arrange(RIGHT*0.3),
                 VGroup(
                     MathTex("\\textrm{Rare~but}", font_size=24, color=WHITE), 

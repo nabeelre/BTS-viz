@@ -21,11 +21,11 @@ class CoDEx(MovingCameraScene):
 
         if not skip_opening:
             # Create and add stars randomly - TODO make stars twinkle, add galaxies
-            num_stars = 5000
+            num_stars = 15000
             star_radius = 0.01
             for _ in range(num_stars):
                 x = np.random.uniform(-50, 350)
-                y = np.random.uniform(-5, 5)
+                y = np.random.uniform(-5, 15)
                 radius = np.random.normal(star_radius, star_radius/2)
                 star = Dot(point=[n.n2p(x)[0], y, 0], radius=radius, color=WHITE)
                 self.add(star)
@@ -277,8 +277,8 @@ class CoDEx(MovingCameraScene):
             post_scroll_text = VGroup(
                 MathTex("\\textrm{We can't search for supernovae}", font_size=30, color=WHITE),
                 MathTex("\\textrm{everywhere, however.}", font_size=30, color=WHITE),
-                MathTex("\\textrm{Some areas are too far south}", font_size=30, color=PURPLE_A),
-                MathTex("\\textrm{Some are obscured by the Milky Way}", font_size=30, color=GREEN_B)
+                MathTex("\\textrm{Some areas are too far south}", font_size=28, color=PURPLE_A),
+                MathTex("\\textrm{Some are obscured by the Milky Way}", font_size=28, color=GREEN_B)
             ).arrange(DOWN*0.4, aligned_edge=LEFT).move_to(legend_text).shift(RIGHT*0.2)
 
             MW_plane = Rectangle(color=GREEN_B, height=frame.height/10, width=frame.width).move_to(frames[-1])

@@ -165,9 +165,12 @@ media/images/*
 media/jupyter/*
 media/Tex/*
 media/texts/*
+media/videos/bts sky source/*
 media/videos/viz/*
 media/videos/scene/480p15/*
 media/videos/scene/720p30/*
 media/videos/scene/1080p60/*
+media/videos/scene/2160p60/*
 !media/videos/scene/1080p60/CoDEx.mp4
 scratch.ipynb
+submission text.md

@@ -3,10 +3,10 @@ from manim.utils.rate_functions import ease_in_expo, ease_in_sine
 
 class CoDEx(MovingCameraScene):
     def construct(self):
-        skip_opening = True
-        skip_2018 = True
-        skip_scrolling = True
-        skip_mag_duration = True
+        skip_opening = False
+        skip_2018 = False
+        skip_scrolling = False
+        skip_mag_duration = False
         skip_ML = False
 
         # Timeline
@@ -128,12 +128,12 @@ class CoDEx(MovingCameraScene):
             self.play(Uncreate(exposure_flash), run_time=0.15, rate_func=linear)
             self.wait(0.7)
 
-            data_rate_text = VGroup(
+            ML_header_text = VGroup(
                 MathTex("10^6 \\textrm{ possible detections and}", font_size=26),
-                Text("TBs of images produced", font_size=18),
-                MarkupText("every night", font_size=18, weight=BOLD)
+                MathTex("\\textrm{TBs~of~images~produced}", font_size=26),
+                MathTex("\\textbf{every night}", font_size=18)
             ).arrange(DOWN*0.3).next_to(cutout, DOWN, buff=0.2)
-            self.play(Uncreate(field), Uncreate(line1), Uncreate(line2), Write(data_rate_text))
+            self.play(Uncreate(field), Uncreate(line1), Uncreate(line2), Write(ML_header_text))
             self.wait(2)
 
             # P60 text
@@ -222,7 +222,7 @@ class CoDEx(MovingCameraScene):
                 VGroup(Text("Point size related to SN brightness", font_size=22, color=WHITE))
             ).arrange(DOWN*0.5, aligned_edge=LEFT).move_to([n.n2p(159+9)[0], 2, 0])
 
-            frames_to_render = 20  # maximum 578
+            frames_to_render = 578  # maximum 578
             file_names = [f'media/images/frames/output{i}.jpeg' for i in np.arange(1, frames_to_render)]
             frames = [ImageMobject(frame) for frame in file_names]
 
@@ -249,7 +249,7 @@ class CoDEx(MovingCameraScene):
                     legend_text.animate.move_to([n.n2p(new_pos)[0]+4.5, 2, 0]),
                     prev_frame.animate.move_to([n.n2p(new_pos)[0]-2, 2.1, 0]),
                     self.camera.frame.animate.move_to([n.n2p(new_pos)[0], 2, 0]),
-                    rate_func=linear, run_time=frame_time/25
+                    rate_func=linear, run_time=frame_time/20
                 )
                 cur_pos = new_pos
                 self.add(frame.move_to(prev_frame))
@@ -268,7 +268,7 @@ class CoDEx(MovingCameraScene):
             self.add(frame.move_to(prev_frame))
             self.remove(prev_frame)
 
-            self.wait(1)
+            self.wait(5)
 
             # Post-scrolling text
             post_scroll_text = VGroup(
@@ -303,6 +303,7 @@ class CoDEx(MovingCameraScene):
                       Uncreate(bts_text), Uncreate(southern_sky), 
                       Uncreate(MW_plane), run_time=2)
 
+
         if not skip_mag_duration:
             if skip_2018:
                 self.camera.frame.move_to([n.n2p(270)[0], 2, 0])
@@ -321,7 +322,7 @@ class CoDEx(MovingCameraScene):
             self.play(Uncreate(bts_sample_text[0]), Uncreate(bts_sample_text[2]),
                       bts_sample_text[1].animate.move_to(bts_sample_text[0]))
 
-            file_names = [f'media/images/SNe/scatter{i}.png' for i in range(0,6)]
+            file_names = [f'media/images/SNe/scatter{i}.png' for i in range(0,7)]
             scatters = [ImageMobject(scatter).move_to(bts_sample_text[1]).shift(DOWN*3 + LEFT*2) for scatter in file_names]
 
             legend_text = VGroup(
@@ -333,54 +334,280 @@ class CoDEx(MovingCameraScene):
             ).arrange(DOWN*0.5, aligned_edge=LEFT).move_to([n.n2p(274.5)[0], 2.4, 0])
 
             annotation_text = VGroup(
-                Text("Small range of intrinsic brightness -> use to calibrate distances", font_size=18, color=WHITE),
-                Text("Variety of progenitor properties -> variety of observable properties", font_size=18, color=WHITE),
-                MarkupText("Rare but <i>extremely</i> bright", font_size=18, color=WHITE),
-                Text("Intrinsicly faint, so only visible when very nearby", font_size=18, color=WHITE)
+                VGroup(
+                    MathTex("\\textrm{Small~range~of~intrinsic~brightness}", font_size=24, color=WHITE), 
+                    MathTex("\\rightarrow", font_size=24, color=WHITE), 
+                    MathTex("\\textrm{used~to~calibrate~distances}", font_size=24, color=WHITE)
+                ).arrange(RIGHT*0.3),
+                VGroup(
+                    MathTex("\\textrm{Variety~of~progenitor~properties}", font_size=24, color=WHITE), 
+                    MathTex("\\rightarrow", font_size=24, color=WHITE), 
+                    MathTex("\\textrm{variety~of~observable~properties}", font_size=24, color=WHITE)
+                ).arrange(RIGHT*0.3),
+                VGroup(
+                    MathTex("\\textrm{Rare~but}", font_size=24, color=WHITE), 
+                    MathTex("\\textit{extremely}", font_size=24, color=WHITE), 
+                    MathTex("\\textrm{bright}", font_size=24, color=WHITE)
+                ).arrange(RIGHT*0.3),
+                MathTex("\\textrm{Intrinsicly~faint,~so~only~visible~when~very~nearby}", font_size=24, color=WHITE)
             ).move_to(scatters[0])
 
             # Legend, axes
-            self.play(FadeIn(scatters[0].scale(0.4)), Write(legend_text[0]))
+            self.play(FadeIn(scatters[0].scale(0.4)))
+            self.wait(1)
+
+            self.play(FadeIn(scatters[1].scale(0.4)))
+            # self.play(FadeOut(scatters[0]))
+            self.wait(2)
+
+            self.play(FadeIn(scatters[2].scale(0.4)))
+            # self.play(FadeOut(scatters[1]))
             self.wait(3)
             
             # Ias
-            self.play(FadeIn(scatters[1].scale(0.4)), Write(legend_text[1]))
+            self.play(FadeIn(scatters[3].scale(0.4)), Write(legend_text[0]), 
+                      Write(legend_text[1]))
             self.play(Write(annotation_text[0].shift(RIGHT*0.2)))
-            self.remove(scatters[0])
-            self.wait(2)
+            # self.play(FadeOut(scatters[2]))
+            self.wait(3.5)
             
             # IIs
-            self.play(FadeIn(scatters[2].scale(0.4)), Write(legend_text[2]), 
+            self.play(FadeIn(scatters[4].scale(0.4)), Write(legend_text[2]), 
                       Uncreate(annotation_text[0]))
             self.play(Write(annotation_text[1].shift(RIGHT*0.2)))
-            self.remove(scatters[1])
-            self.wait(2)
+            # self.play(FadeOut(scatters[3]))
+            self.wait(3.5)
             
             # SLSN
-            self.play(FadeIn(scatters[3].scale(0.4)), Write(legend_text[3]), 
+            self.play(FadeIn(scatters[5].scale(0.4)), Write(legend_text[3]), 
                       Uncreate(annotation_text[1]))
             self.play(Write(annotation_text[2].shift(RIGHT*3.5 + UP*1.5)))
-            self.remove(scatters[2])
-            self.wait(2)
+            # self.play(FadeOut(scatters[4]))
+            self.wait(3.5)
             
             # Novae
-            self.play(FadeIn(scatters[4].scale(0.4)), Write(legend_text[4]), 
+            self.play(FadeIn(scatters[6].scale(0.4)), Write(legend_text[4]), 
                       Uncreate(annotation_text[2]))
             self.play(Write(annotation_text[3].shift(LEFT*0.5, DOWN*0.7)))
-            self.remove(scatters[3])
-            self.wait(3)
+            # self.play(FadeOut(scatters[5]))
+            self.wait(4.5)
 
             self.play(Uncreate(annotation_text[3]))
             self.wait(4)
 
-            self.play(Uncreate(legend_text), Uncreate(bts_sample_text[1]),
-                      FadeOut(scatters[4]))
+            self.play(Uncreate(legend_text), Uncreate(bts_sample_text[1]))
+            for scatter in scatters[:-1]:
+                self.remove(scatter)
+            self.play(FadeOut(scatters[-1]))
+
 
         if not skip_ML:
             if skip_2018:
                 self.camera.frame.move_to([n.n2p(270)[0], 2, 0])
 
-            pass
+            ML_header_text = MathTex("\\textrm{We have now fully-automated much of our real-time SN discovery and classification workflow}", font_size=32)
+            ML_header_text.move_to([n.n2p(270)[0], 5.5, 0])
+
+            self.play(Write(ML_header_text[0]), run_time=2.5)
+            self.wait(4)
+
+            # P48
+            p48_image = ImageMobject("media/images/darkp48_flip.png").scale(0.35)
+            p48_image.move_to([n.n2p(265)[0], n.get_y()+0.78, 0])
+            p48_corner = p48_image.get_corner(UL) + DOWN*0.3 + RIGHT*0.3
+
+            p48_obs = VGroup(
+                MathTex("\\textrm{P48 robotically scans the sky}", font_size=28),
+                MathTex("\\textrm{producing } 10^6 \\textrm{ possible}", font_size=28),
+                MathTex("\\textrm{detections per night}", font_size=28)
+            ).arrange(DOWN*0.3).next_to(p48_image, DOWN, buff=0.16)
+
+            self.play(FadeIn(p48_image), Write(p48_obs))
+            self.wait(3.5)
+        
+            # braai
+            braai_name = MathTex("\\texttt{braai}", font_size=36)
+            braai_name.next_to(p48_corner, UP, buff=3.5).shift(RIGHT*0.4)
+
+            braai_arrow = CurvedArrow(p48_corner, 
+                                      braai_name.get_left()+[-0.25,0.1,0], 
+                                      angle=-PI*0.7).set_z_index(2)
+
+            braai_cutout = ImageMobject("media/images/realbogus.png").scale(0.3)
+            braai_cutout.move_to(braai_name).shift(DOWN*1.2)
+
+            braai_descrip = VGroup(
+                MathTex("\\textrm{Removes}", font_size=28),
+                MathTex("\\textrm{non-astrophysical}", font_size=28),
+                MathTex("\\textrm{detections}", font_size=28)
+            ).arrange(DOWN*0.3).move_to(braai_name).shift(DOWN*2.5)
+
+            self.play(Create(braai_arrow))
+            self.play(Write(braai_name))
+
+            self.play(FadeIn(braai_cutout), Write(braai_descrip))
+            self.wait(4)
+
+            # sgscore
+            sgscore_name = MathTex("\\texttt{sgscore}", font_size=36)
+            sgscore_name.next_to(braai_name, RIGHT, buff=2)
+
+            sgscore_arrow = Arrow(braai_name.get_right(), sgscore_name.get_left())
+            
+            sgscore_tree = ImageMobject("media/images/sgscore_tree.png").scale(0.45)
+            sgscore_tree.move_to(sgscore_name).shift(DOWN*1.2)
+
+            sgscore_descrip = VGroup(
+                MathTex("\\textrm{Sorts}", font_size=28),
+                MathTex("\\textrm{stars and galaxies}", font_size=28),
+            ).arrange(DOWN*0.3).move_to(sgscore_name).shift(DOWN*2.5)
+
+            self.play(Create(sgscore_arrow))
+            self.play(Write(sgscore_name))
+            self.wait(1)
+
+            self.play(FadeIn(sgscore_tree), Write(sgscore_descrip))
+            self.wait(4)
+
+            # BTSbot
+            BTSbot_name = MathTex("\\texttt{BTSbot}", font_size=36)
+            BTSbot_name.next_to(sgscore_name, RIGHT, buff=2)
+
+            BTSbot_arrow = Arrow(sgscore_name.get_right(), BTSbot_name.get_left())
+            
+            BTSbot_cutouts = ImageMobject("media/images/btsbot.png").scale(0.3)
+            BTSbot_cutouts.move_to(BTSbot_name).shift(DOWN*1.2)
+
+            BTSbot_descrip = VGroup(
+                MathTex("\\textrm{Selects SNe and}", font_size=28),
+                MathTex("\\textrm{rejects everything else}", font_size=28),
+            ).arrange(DOWN*0.3).move_to(BTSbot_name).shift(DOWN*2.5)
+
+            self.play(Create(BTSbot_arrow))
+            self.play(Write(BTSbot_name))
+            self.wait(1)
+
+            self.play(FadeIn(BTSbot_cutouts), Write(BTSbot_descrip))
+            self.wait(4)
+
+            # Draw P60 and arrow to it    
+            p60_image = ImageMobject("media/images/darkp60.png").scale(0.45)
+            p60_image.move_to([n.n2p(272)[0], n.get_y()+0.78, 0])
+            p60_corner = p60_image.get_corner(UL) + DOWN*0.2 + RIGHT*0.2
+
+            p60_obs = VGroup(
+                MathTex("\\textrm{P60 robotically observes new}", font_size=28),
+                MathTex("\\textrm{SNe suggested by } \\texttt{BTSbot}", font_size=28)
+            ).arrange(DOWN*0.3).next_to(p60_image, DOWN, buff=0.16)
+
+            p60_arrow = CurvedArrow(BTSbot_descrip.get_corner(DL)+[0.1,0,0], p60_corner,
+                                    angle=PI*0.4)
+
+            self.play(FadeIn(p60_image), Create(p60_arrow), Write(p60_obs))
+            self.wait(3)
+
+            # SNIascore
+            SNIascore_name = MathTex("\\texttt{SNIascore}", font_size=36)
+            SNIascore_name.next_to(BTSbot_name, RIGHT, buff=2.5)
+            
+            SNIascore_diagram = ImageMobject("media/images/SNIa.png").scale(0.7)
+            SNIascore_diagram.move_to(SNIascore_name).shift(DOWN*1.2)
+
+            SNIascore_descrip = VGroup(
+                MathTex("\\textrm{Classifies SNe and sends}", font_size=28),
+                MathTex("\\textrm{reports to the community}", font_size=28),
+            ).arrange(DOWN*0.3).move_to(SNIascore_name).shift(DOWN*2.5)
+
+            arc1 = ArcBetweenPoints(p60_image.get_corner(UR)+[-0.75, -0.3, 0], 
+                                    SNIascore_descrip.get_left()+[-0.5, 1.5, 0], 
+                                    angle=PI*0.25, color=WHITE)
+            
+            arc2 = ArcBetweenPoints(SNIascore_descrip.get_left()+[-0.5, 1.5, 0],
+                                    SNIascore_name.get_left()+[-0.4, 0, 0],
+                                    angle=-PI*0.5, color=WHITE)
+            
+            arrow_tip = ArrowTriangleFilledTip(color=WHITE)
+            arrow_tip.rotate(PI).move_to(arc2.get_end())
+
+            self.play(Create(arc1), rate_func=linear)
+            self.play(Create(arc2), rate_func=linear, run_time=0.5)
+            self.play(Create(arrow_tip), run_time=0.25)
+            self.play(Write(SNIascore_name))
+            self.wait(1)
+
+            self.play(FadeIn(SNIascore_diagram), Write(SNIascore_descrip))
+            self.wait(6)
+
+            p60_arrow_new = CurvedArrow(BTSbot_cutouts.get_corner(DL)+[0.1,0.2,0], 
+                                        p60_corner, angle=PI*0.4)
+
+            self.play(
+                Uncreate(p48_obs), Uncreate(braai_descrip), 
+                Uncreate(sgscore_descrip), Uncreate(BTSbot_descrip), 
+                Uncreate(p60_obs), Uncreate(SNIascore_descrip),
+                ReplacementTransform(p60_arrow, p60_arrow_new)
+            )
+
+            ML_header_text2 = MathTex("\\textrm{Now, nearly a billion years after the explosion, photons from the white dwarf reach Earth}", font_size=32)
+            ML_header_text2.move_to([n.n2p(270)[0], 5.5, 0])
+
+            self.play(Uncreate(ML_header_text), Write(ML_header_text2))
+            self.wait(4)
+
+            # Create photons
+            num_phots = 50
+            phots_x = np.random.normal(260, 0.5, num_phots)
+            phots_y = np.random.normal(15, 0.5, num_phots)
+            photons = [Dot([n.n2p(p_x)[0], p_y, 0], radius=0.025, color=WHITE) for p_x, p_y in zip(phots_x, phots_y)]
+            phots_t = np.random.uniform(0.5, 2.5, num_phots)
+            
+            # Add, move, and remove photons
+            [self.add(phot) for phot in photons]
+            
+            move_photons = []
+            for phot, t in zip(photons, phots_t):
+                move_photons.append(ApplyMethod(phot.move_to, p48_corner, run_time=t))
+            self.play(*move_photons, rate_func=linear)
+            
+            [self.remove(phot) for phot in photons]
+
+            # highlight workflow
+            self.play(braai_arrow.animate.set_fill(YELLOW_E),
+                      braai_arrow.animate.set_color(YELLOW_E), run_time=0.5)
+            self.play(braai_name.animate.set_fill(YELLOW_E), run_time=0.5)
+            self.play(sgscore_arrow.animate.set_fill(YELLOW_E),
+                      sgscore_arrow.animate.set_color(YELLOW_E), run_time=0.5)
+            self.play(sgscore_name.animate.set_fill(YELLOW_E), run_time=0.5)
+            self.play(BTSbot_arrow.animate.set_fill(YELLOW_E),
+                      BTSbot_arrow.animate.set_color(YELLOW_E), run_time=0.5)
+            self.play(BTSbot_name.animate.set_fill(YELLOW_E), run_time=0.5)
+            self.play(p60_arrow.animate.set_fill(YELLOW_E),
+                      p60_arrow.animate.set_color(YELLOW_E), run_time=0.5)
+            self.play(arc1.animate.set_color(YELLOW_E), run_time=0.3)
+            self.play(arc2.animate.set_color(YELLOW_E), 
+                      arrow_tip.animate.set_fill(YELLOW_E), run_time=0.2)
+            self.play(SNIascore_name.animate.set_fill(YELLOW_E), run_time=0.5)
+
+            # summary
+            # summary_text = VGroup(
+            #     MathTex("\\textrm{By adopting deep learning tools in this workflow,}", font_size=32),
+            #     MathTex("\\textrm{we achieved the world's first fully-automatic}", font_size=32),
+            #     MathTex("\\textrm{end-to-end discovery and classification of a SN.}", font_size=32)
+            # ).arrange(DOWN*0.3).next_to(p48_image, RIGHT, buff=2).shift(UP*1)
+
+            summary_text = VGroup(
+                MathTex("\\textrm{A world first, no human}", font_size=32),
+                MathTex("\\textrm{action is necessary from}", font_size=32),
+                MathTex("\\textrm{discovery to classification}", font_size=32),
+                MathTex("\\textrm{for most SNe we find.}", font_size=32)
+            ).arrange(DOWN*0.3).next_to(p48_image, RIGHT, buff=0.15).shift(UP*0.4)
+
+
+
+            self.play(Write(summary_text))
+
+            # Remove all, ending scene
+
 
         self.wait(4)
 

@@ -131,7 +131,7 @@ class CoDEx(MovingCameraScene):
             ML_header_text = VGroup(
                 MathTex("10^6 \\textrm{ possible detections and}", font_size=26),
                 MathTex("\\textrm{TBs~of~images~produced}", font_size=26),
-                MathTex("\\textbf{every night}", font_size=18)
+                MathTex("\\textbf{every night}", font_size=26)
             ).arrange(DOWN*0.3).next_to(cutout, DOWN, buff=0.2)
             self.play(Uncreate(field), Uncreate(line1), Uncreate(line2), Write(ML_header_text))
             self.wait(2)
@@ -242,14 +242,17 @@ class CoDEx(MovingCameraScene):
 
             prev_frame = frames[0]
             frame_time = 0.0667  # seconds per frame
-            for frame in frames[1:-1]:
+            speed_modifiers = np.append(np.linspace(1,20,int(587/2)+1), 
+                                        np.linspace(1,20,int(587/2)+1)[::-1])
+
+            for frame, speed_modifier in zip(frames[1:-1], speed_modifiers):
                 new_pos = cur_pos + scroll_speed*frame_time
                 self.play(
                     bts_text.animate.move_to([n.n2p(new_pos)[0], 4.8, 0]),
                     legend_text.animate.move_to([n.n2p(new_pos)[0]+4.5, 2, 0]),
                     prev_frame.animate.move_to([n.n2p(new_pos)[0]-2, 2.1, 0]),
                     self.camera.frame.animate.move_to([n.n2p(new_pos)[0], 2, 0]),
-                    rate_func=linear, run_time=frame_time/20
+                    rate_func=linear, run_time=frame_time/speed_modifier
                 )
                 cur_pos = new_pos
                 self.add(frame.move_to(prev_frame))
@@ -263,12 +266,12 @@ class CoDEx(MovingCameraScene):
                 legend_text.animate.move_to([n.n2p(270)[0]+4.5, 2, 0]),
                 prev_frame.animate.move_to([n.n2p(270)[0]-2, 2.1, 0]),
                 self.camera.frame.animate.move_to([n.n2p(270)[0], 2, 0]),
-                rate_func=ease_in_expo, run_time=frame_time/4
+                rate_func=ease_in_expo, run_time=frame_time
             )
             self.add(frame.move_to(prev_frame))
             self.remove(prev_frame)
 
-            self.wait(5)
+            self.wait(4)
 
             # Post-scrolling text
             post_scroll_text = VGroup(
@@ -340,7 +343,7 @@ class CoDEx(MovingCameraScene):
                     MathTex("\\textrm{used~to~calibrate~distances}", font_size=24, color=WHITE)
                 ).arrange(RIGHT*0.3),
                 VGroup(
-                    MathTex("\\textrm{Variety~of~progenitor~properties}", font_size=24, color=WHITE), 
+                    MathTex("\\textrm{Variety~of~precursor~properties}", font_size=24, color=WHITE), 
                     MathTex("\\rightarrow", font_size=24, color=WHITE), 
                     MathTex("\\textrm{variety~of~observable~properties}", font_size=24, color=WHITE)
                 ).arrange(RIGHT*0.3),
@@ -588,28 +591,83 @@ class CoDEx(MovingCameraScene):
                       arrow_tip.animate.set_fill(YELLOW_E), run_time=0.2)
             self.play(SNIascore_name.animate.set_fill(YELLOW_E), run_time=0.5)
 
-            # summary
-            # summary_text = VGroup(
-            #     MathTex("\\textrm{By adopting deep learning tools in this workflow,}", font_size=32),
-            #     MathTex("\\textrm{we achieved the world's first fully-automatic}", font_size=32),
-            #     MathTex("\\textrm{end-to-end discovery and classification of a SN.}", font_size=32)
-            # ).arrange(DOWN*0.3).next_to(p48_image, RIGHT, buff=2).shift(UP*1)
-
             summary_text = VGroup(
                 MathTex("\\textrm{A world first, no human}", font_size=32),
-                MathTex("\\textrm{action is necessary from}", font_size=32),
-                MathTex("\\textrm{discovery to classification}", font_size=32),
-                MathTex("\\textrm{for most SNe we find.}", font_size=32)
-            ).arrange(DOWN*0.3).next_to(p48_image, RIGHT, buff=0.15).shift(UP*0.4)
-
-
+                MathTex("\\textrm{action is taken from SN}", font_size=32),
+                MathTex("\\textrm{discovery to classification.}", font_size=32)
+            ).arrange(DOWN*0.3).next_to(p48_image, RIGHT, buff=0.2).shift(UP*0.4)
 
             self.play(Write(summary_text))
+            self.wait(4)
 
-            # Remove all, ending scene
+            SNIascore_arrow = Arrow(BTSbot_name.get_right(), SNIascore_name.get_left())
+
+            self.play(
+                Uncreate(ML_header_text2), Uncreate(summary_text),
+                FadeOut(p48_image), FadeOut(p60_image), 
+                Uncreate(arc1), Uncreate(arc2), Uncreate(arrow_tip), 
+                Uncreate(p60_arrow_new), Uncreate(p60_arrow),
+                Uncreate(braai_arrow), Create(SNIascore_arrow),
+                braai_name.animate.set_fill(WHITE),
+                sgscore_name.animate.set_fill(WHITE),
+                BTSbot_name.animate.set_fill(WHITE),
+                SNIascore_name.animate.set_fill(WHITE),
+                sgscore_arrow.animate.set_fill(WHITE),
+                sgscore_arrow.animate.set_color(WHITE),
+                BTSbot_arrow.animate.set_fill(WHITE),
+                BTSbot_arrow.animate.set_color(WHITE)
+            )
+
+            final_header = VGroup(
+                MathTex("\\textrm{Animated by Nabeel Rehemtulla}", font_size=60),
+                MathTex("\\textrm{Astronomy PhD Student advised by Adam A. Miller}", font_size=32)
+            ).arrange(DOWN*0.4).move_to([n.n2p(270)[0], 9, 0])
+
+            manim_text = VGroup(
+                MathTex("\\textrm{Animated with Manim, source}", font_size=26),
+                MathTex("\\textrm{code at github.com/nabeelre/BTS-viz}", font_size=26)
+            ).arrange(DOWN*0.3).move_to([n.n2p(270)[0], 7.8, 0])
+            
+            refs_text = VGroup(
+                MathTex("\\textrm{References:}", font_size=28),
+                MathTex("\\textrm{Bellm et al. 2019, PASP, 131, 8002}", font_size=22),
+                MathTex("\\textrm{Duev at al. 2019, MNRAS, 489, 3582}", font_size=22),
+                MathTex("\\textrm{Fremling et al. 2020, ApJ, 895, 32}", font_size=22),
+                MathTex("\\textrm{Fremling et al. 2021, ApJ, 917, 2}", font_size=22),
+                MathTex("\\textrm{Perley et al. 2020, ApJ, 904, 35}", font_size=22),
+                MathTex("\\textrm{Rehemtulla et al. 2024, arXiv:2401.15167}", font_size=22),
+                MathTex("\\textrm{Tachibana \& Miller, PASP, 130, 8001}", font_size=22)
+            ).arrange(DOWN*0.2, aligned_edge=LEFT).move_to([n.n2p(265.3)[0], 6.8, 0])
+
+            credits_text = VGroup(
+                MathTex("\\textrm{Other Credits:}", font_size=28),
+                MathTex("\\textrm{Sky animation: Christoffer Fremling}", font_size=22),
+                MathTex("\\textrm{Sky animation background: ESA/Gaia/DPAC}", font_size=22),
+                MathTex("\\textrm{P48 and P60 images: ztf.caltech.edu}", font_size=22),
+                MathTex("\\textrm{Color galaxy: Pan-STARRS survey}", font_size=22),
+            ).arrange(DOWN*0.2, aligned_edge=LEFT).move_to([n.n2p(270)[0], 6.4, 0])
+
+            ztf_logo = ImageMobject("media/images/ztf_logo.png")
+            ciera_logo = ImageMobject("media/images/ciera.png").scale(0.44)
+            isgc_logo = ImageMobject("media/images/isgc.png").scale(0.3)
+            
+            ztf_logo.move_to([n.n2p(273.5)[0], 6, 0])
+            ciera_logo.move_to([n.n2p(274.5)[0], 7.4, 0])
+            isgc_logo.move_to([n.n2p(275.5)[0], 6, 0])
+
+            self.play(
+                FadeIn(final_header[1]), FadeIn(manim_text), FadeIn(credits_text), 
+                FadeIn(ztf_logo), FadeIn(ciera_logo), FadeIn(isgc_logo), FadeIn(refs_text)
+            )
+            
+            self.play(
+                self.camera.frame.animate.move_to([n.n2p(270)[0], 6.2, 0])
+            )
+
+            self.wait(1)
+            self.play(Write(final_header[0]), run_time=2)
+
+        self.wait(10)
 
 
-        self.wait(4)
-
-
-        # end credits to ESA/Gaia/DPAC, Christoffer Fremling, Caltech, 
+         
